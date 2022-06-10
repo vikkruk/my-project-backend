@@ -1,24 +1,30 @@
-/* eslint-disable func-names */
-/* eslint-disable object-shorthand */
-
 import {
   Document,
-  Model, model, Schema, Types,
+  Model,
+  model,
+  Schema,
+  Types,
 } from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
+import { favoredArtistSchema } from './favored-artist-model';
 
-export type FavoredActor = {
+export type FavoredArtist = {
   _id: Types.ObjectId,
-  actorId: Types.ObjectId,
+  artistId: Types.ObjectId,
 };
 
 export type User = {
   email: string,
   password: string,
+  nickname: string,
   role: 'user' | 'admin',
-  favoredActors: FavoredActor[],
-  nickname?: string,
+  favored: {
+    actors: FavoredArtist[],
+    directors: FavoredArtist[]
+  },
   avatar?: string,
+  createdAt: string,
+  updatedAt: string,
 };
 
 export type UserDocument = Document<Types.ObjectId, unknown, User> & User & {
@@ -37,7 +43,7 @@ const userSchema = new Schema<User, Model<User>>({
   },
   nickname: {
     type: String,
-    default: function () {
+    default() {
       return this.email;
     },
     unique: true,
@@ -50,16 +56,19 @@ const userSchema = new Schema<User, Model<User>>({
     enum: ['user', 'admin'],
     default: 'user',
   },
-  favoredActors: {
-    type: [{
-      actorId: {
-        type: Schema.Types.ObjectId,
-        ref: 'Artist',
-        required: true,
-      },
-    }],
-    default: [],
+  favored: {
+    actors: {
+      type: [favoredArtistSchema],
+      default: [],
+    },
+    directors: {
+      type: [favoredArtistSchema],
+      default: [],
+    },
+
   },
+}, {
+  timestamps: true,
 });
 
 userSchema.plugin(uniqueValidator);

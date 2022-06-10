@@ -5,7 +5,9 @@ import artistsRouter from './routers/artists-router';
 import artistRolesRouter from './routers/artist-roles-router';
 import config from './config';
 import authRouter from './routers/auth-router';
-import favoredActorsRouter from './routers/favored-actors-router';
+import favoredArtistsRouter from './routers/favored-artists-router';
+import genresRouter from './routers/genres-router';
+import movieRouter from './routers/movies-router';
 
 const server = express();
 
@@ -15,7 +17,9 @@ server.use(express.json());
 server.use('/api/artists', artistsRouter);
 server.use('/api/artist-roles', artistRolesRouter);
 server.use('/api/auth', authRouter);
-server.use('/api/fav-actors', favoredActorsRouter);
+server.use('/api/fav-artists', favoredArtistsRouter);
+server.use('/api/movies', movieRouter);
+server.use('/api/genres', genresRouter);
 
 mongoose.connect(
   config.db.connectionURL,

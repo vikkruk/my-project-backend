@@ -21,7 +21,7 @@ export const login: RequestHandler = async (req, res) => {
     if (!passwordIsCorrect) throw new Error('Invalid password');
 
     const token = jwt
-      .sign({ email, role: user.role, favoredActors: user.favoredActors }, config.token.secret);
+      .sign({ email, role: user.role }, config.token.secret);
 
     res.status(200).json({
       user,
@@ -48,18 +48,13 @@ export const register: RequestHandler = async (req, res) => {
       password: hashedPassword,
     });
 
-    const token = jwt.sign({
-      email,
-      role: createdUser.role,
-      favoredActors: createdUser.favoredActors,
-    }, config.token.secret);
+    const token = jwt.sign({ email, role: createdUser.role }, config.token.secret);
 
     res.status(201).json({
       user: createdUser,
       token: `Bearer ${token}`,
     });
   } catch (error) {
-    console.log(error);
     let errorMessage;
 
     if (error instanceof Error.ValidationError) {
