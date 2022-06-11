@@ -37,5 +37,3 @@ mongoose.connect(
   },
 
 );
-
-// "json-server -p 8000 -w ./database/db.json",
