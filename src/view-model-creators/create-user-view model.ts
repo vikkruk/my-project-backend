@@ -1,5 +1,5 @@
 import { User, UserDocument } from '../models/user-model';
-import createFavoredArtistViewModel, { FavoredArtistViewModel } from './create-favored-artists-view-model';
+import createFavoredArtistViewModel, { FavoredArtistViewModel } from './create-favored-artist-view-model';
 
 export type UserViewModel = Omit<User, 'password' | 'favored'> & {
   id: string,

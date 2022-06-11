@@ -6,12 +6,28 @@ import {
   Types,
 } from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
-import { favoredArtistSchema } from './favored-artist-model';
+import { ArtistDocument } from './artist-model';
 
 export type FavoredArtist = {
   _id: Types.ObjectId,
   artistId: Types.ObjectId,
+  createdAt: string,
+  updatedAt: string,
 };
+
+export type FavoredArtistDocument = Types.Subdocument<Types.ObjectId> & FavoredArtist;
+
+export type FavoredArtistPopulatedDocument = Omit<FavoredArtistDocument, 'artistId'> & {
+  artistId: ArtistDocument
+};
+
+export const favoredArtistSchema = new Schema<FavoredArtist, Model<FavoredArtist>>({
+  artistId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Artist',
+    required: true,
+  },
+});
 
 export type User = {
   email: string,
