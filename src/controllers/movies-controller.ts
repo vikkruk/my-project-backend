@@ -1,29 +1,49 @@
 import { RequestHandler } from 'express';
 import { Error, UpdateQuery } from 'mongoose';
-import MovieModel, { Movie, MovieDocument } from '../models/movie-model';
+import MovieModel, { Movie } from '../models/movie-model';
 import createMovieViewModel, { MovieViewModel } from '../view-model-creators/create-movie-view-model';
+import createMoviePopulatedViewModel, { MoviePopulatedViewModel } from '../view-model-creators/create-movie-populated-view-model';
+import { ArtistDocument } from '../models/artist-model';
+import { GenreDocument } from '../models/genre-model';
 
 type SingularMovieRequestHandlerResponse = { movie: MovieViewModel } | ErrorResponseBody;
 
 export const getMovies: RequestHandler<
   unknown,
-  { movies: MovieViewModel[] } | ErrorResponseBody,
+  { movies: MovieViewModel[] | MoviePopulatedViewModel[] } | ErrorResponseBody,
   unknown,
-  { genre?: string }
+  { genre?: string, populate?: string }
 > = async (req, res) => {
-  const { genre } = req.query;
+  const { genre, populate } = req.query;
 
-  let movieDocs: MovieDocument[];
+  let movies: MovieViewModel[] | MoviePopulatedViewModel[];
 
   try {
-    if (genre === undefined) {
-      movieDocs = await MovieModel.find();
+    if (genre !== undefined && populate === undefined) {
+      const movieDocs = await MovieModel.find({ genres: { $in: genre } });
+      movies = movieDocs.map(createMovieViewModel);
+    } else if (genre === undefined && populate === 'all') {
+      const movieDocs = await MovieModel.find()
+        .populate<{
+          directors: ArtistDocument[],
+          actors: ArtistDocument[],
+          genres: GenreDocument[],
+        }>({ path: 'directors actors genres', options: { _recursed: true } });
+      movies = movieDocs.map(createMoviePopulatedViewModel);
+    } else if (genre !== undefined && populate === 'all') {
+      const movieDocs = await MovieModel.find({ genres: { $in: genre } })
+        .populate<{
+          directors: ArtistDocument[],
+          actors: ArtistDocument[],
+          genres: GenreDocument[],
+        }>({ path: 'directors actors genres', options: { _recursed: true } });
+      movies = movieDocs.map(createMoviePopulatedViewModel);
     } else {
-      movieDocs = await MovieModel.find({ genres: { $in: genre } });
+      const movieDocs = await MovieModel.find();
+      movies = movieDocs.map(createMovieViewModel);
     }
-
     res.status(200).json({
-      movies: movieDocs.map((movieDoc) => createMovieViewModel(movieDoc)),
+      movies,
     });
   } catch (error) {
     res.status(400).json({

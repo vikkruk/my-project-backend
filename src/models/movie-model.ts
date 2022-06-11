@@ -1,6 +1,8 @@
 import {
   Document, model, Model, Schema, Types,
 } from 'mongoose';
+import { ArtistDocument } from './artist-model';
+import { GenreDocument } from './genre-model';
 
 export type Movie = {
   title: string,
@@ -13,6 +15,12 @@ export type Movie = {
 
 export type MovieDocument = Document<Types.ObjectId, unknown, Movie> & Movie & {
   _id: Types.ObjectId,
+};
+
+export type MoviePopulatedDocument = Omit<MovieDocument, 'directors' | 'actors' | 'genres'> & {
+  directors: ArtistDocument[],
+  actors: ArtistDocument[]
+  genres: GenreDocument[],
 };
 
 const movieSchema = new Schema<Movie, Model<Movie>>({
