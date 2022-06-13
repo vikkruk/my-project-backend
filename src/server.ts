@@ -1,6 +1,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
+import cors from 'cors';
 import artistsRouter from './routers/artists-router';
 import artistRolesRouter from './routers/artist-roles-router';
 import config from './config';
@@ -11,6 +12,7 @@ import movieRouter from './routers/movies-router';
 
 const server = express();
 
+server.use(cors());
 server.use(morgan(':method :url :status'));
 server.use(express.static('public'));
 server.use(express.json());

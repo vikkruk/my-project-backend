@@ -2,29 +2,39 @@ import { RequestHandler } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Error } from 'mongoose';
-import UserModel from '../models/user-model';
+import UserModel, { UserProps } from '../models/user-model';
 import config from '../config';
+import createUserViewModel, { UserViewModel } from '../view-model-creators/create-user-view model';
 
-export const login: RequestHandler = async (req, res) => {
+type AuthResponseBody = {
+  user: UserViewModel,
+  token: string,
+} | ErrorResponseBody;
+
+export const login: RequestHandler<
+  unknown,
+  AuthResponseBody,
+  Partial<UserProps>
+> = async (req, res) => {
   const { email, password } = req.body;
 
   try {
     if (!email) throw new Error('Email is required');
     if (!password) throw new Error('Password is required');
 
-    const user = await UserModel.findOne({ email });
+    const userDoc = await UserModel.findOne({ email });
 
-    if (user === null) throw new Error(`User with email ${email} does not exist`);
+    if (userDoc === null) throw new Error(`User with email ${email} does not exist`);
 
-    const passwordIsCorrect = bcrypt.compareSync(password, user.password);
+    const passwordIsCorrect = bcrypt.compareSync(password, userDoc.password);
 
-    if (!passwordIsCorrect) throw new Error('Invalid password');
+    if (!passwordIsCorrect) throw new Error('Password is incorrect');
 
     const token = jwt
-      .sign({ email, role: user.role }, config.token.secret);
+      .sign({ email, role: userDoc.role }, config.token.secret);
 
     res.status(200).json({
-      user,
+      user: createUserViewModel(userDoc),
       token: `Bearer ${token}`,
     });
   } catch (error) {

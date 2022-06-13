@@ -15,18 +15,24 @@ export type FavoredArtist = {
   updatedAt: string,
 };
 
+export type FavoredArtistProps = Omit<FavoredArtist, '_id' | 'artistId' | 'createdAt' | 'updatedAt'> & {
+  artistId: string
+};
+
 export type FavoredArtistDocument = Types.Subdocument<Types.ObjectId> & FavoredArtist;
 
 export type FavoredArtistPopulatedDocument = Omit<FavoredArtistDocument, 'artistId'> & {
   artistId: ArtistDocument
 };
 
-export const favoredArtistSchema = new Schema<FavoredArtist, Model<FavoredArtist>>({
+export const favoredArtistSchema = new Schema<FavoredArtist>({
   artistId: {
     type: Schema.Types.ObjectId,
     ref: 'Artist',
     required: true,
   },
+}, {
+  timestamps: true,
 });
 
 export type User = {
@@ -41,6 +47,13 @@ export type User = {
   avatar?: string,
   createdAt: string,
   updatedAt: string,
+};
+
+export type UserProps = Omit<User, 'createdAt' | 'updatedAt' | 'role' | 'favored'> & {
+  favored: {
+    actors: FavoredArtist[],
+    directors: FavoredArtist[],
+  }
 };
 
 export type UserDocument = Document<Types.ObjectId, unknown, User> & User & {
