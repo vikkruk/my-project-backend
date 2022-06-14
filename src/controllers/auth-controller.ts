@@ -110,3 +110,31 @@ export const authenticate: RequestHandler<
     });
   }
 };
+
+export const checkEmail: RequestHandler<
+  unknown,
+  { available: true } | ErrorResponseBody,
+  unknown,
+  { email?: string }
+> = async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (email === undefined) {
+      throw new Error('Email is required for checking');
+    }
+
+    const userDoc = await UserModel.findOne({ email });
+    if (userDoc !== null) {
+      throw new Error('This email is already registered');
+    }
+    res.status(200).json({
+      available: true,
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error instanceof Error
+        ? error.message
+        : 'Error occured while logging in',
+    });
+  }
+};
