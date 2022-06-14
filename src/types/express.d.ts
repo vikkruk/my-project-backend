@@ -6,6 +6,7 @@ declare global {
       tokenData?: {
         email: string,
         role: string,
+        token: string
       },
       authUserDoc: UserDocument
     }

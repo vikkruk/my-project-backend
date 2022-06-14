@@ -81,3 +81,32 @@ export const register: RequestHandler = async (req, res) => {
     });
   }
 };
+
+export const authenticate: RequestHandler<
+  unknown,
+  AuthResponseBody
+> = async (req, res) => {
+  try {
+    if (req.tokenData === undefined) {
+      throw new Error('Request does not contain tokenData');
+    }
+    const { email, token } = req.tokenData;
+    const userDoc = await UserModel.findOne({ email });
+
+    if (userDoc === null) {
+      throw new Error(`User with email ${email} was not found`);
+    }
+    const user = createUserViewModel(userDoc);
+
+    res.status(200).json({
+      user,
+      token: `Bearer ${token}`,
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error instanceof Error
+        ? error.message
+        : 'Error occured while logging in',
+    });
+  }
+};
