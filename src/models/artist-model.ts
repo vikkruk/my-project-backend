@@ -5,6 +5,7 @@ import {
   Schema,
   Types,
 } from 'mongoose';
+import { ArtistRoleDocument } from './artist-role-model';
 
 export type Artist = {
   name: string,
@@ -12,12 +13,14 @@ export type Artist = {
   img: string,
   gender: string,
   roles: Types.ObjectId[],
-  createdAt: string,
-  updatedAt: string,
 };
 
 export type ArtistDocument = Document<Types.ObjectId, unknown, Artist> & Artist & {
   _id: Types.ObjectId;
+};
+
+export type ArtistPopulatedDocument = Omit<ArtistDocument, 'roles'> & {
+  roles: ArtistRoleDocument[];
 };
 
 const artistSchema = new Schema<Artist, Model<Artist>>({
@@ -38,13 +41,10 @@ const artistSchema = new Schema<Artist, Model<Artist>>({
     required: true,
   },
   roles: {
-
     type: [{ type: Schema.Types.ObjectId, ref: 'ArtistRole' }],
     default: [],
 
   },
-}, {
-  timestamps: true,
 });
 
 const ArtistModel = model('Artist', artistSchema);

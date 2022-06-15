@@ -7,8 +7,6 @@ export type ArtistViewModel = {
   img: string,
   gender: string,
   roles: string[],
-  createdAt: string,
-  updatedAt: string,
 };
 
 const createArtistViewModel = (artistDoc: ArtistDocument): ArtistViewModel => ({
@@ -18,8 +16,7 @@ const createArtistViewModel = (artistDoc: ArtistDocument): ArtistViewModel => ({
   img: artistDoc.img,
   gender: artistDoc.gender,
   roles: artistDoc.roles.map((artistRoleId) => artistRoleId.toString()),
-  createdAt: artistDoc.createdAt,
-  updatedAt: artistDoc.updatedAt,
+
 });
 
 export default createArtistViewModel;

@@ -1,39 +1,40 @@
 import { RequestHandler } from 'express';
 import { Error, UpdateQuery } from 'mongoose';
-import ArtistModel, { Artist, ArtistDocument } from '../models/artist-model';
+import ArtistModel, { Artist, ArtistPopulatedDocument } from '../models/artist-model';
+import { ArtistRoleDocument } from '../models/artist-role-model';
+import createArtistPopulatedViewModel, { ArtistPopulatedViewModel } from '../view-model-creators/create-artist-populated-view-model';
 import createArtistViewModel, { ArtistViewModel } from '../view-model-creators/create-artist-view-model';
 
 type SingularArtistRequestHandlerResponse = { artist: ArtistViewModel } | ErrorResponseBody;
 
-type GetArtistsRequestHandler = RequestHandler<
+export const getArtists: RequestHandler<
   unknown,
-  { artists: ArtistViewModel[] },
+  { artists: ArtistPopulatedViewModel[] },
   unknown,
   { role?: 'actor' | 'director' | 'writer' }
->;
-
-export const getArtists: GetArtistsRequestHandler = async (req, res) => {
+> = async (req, res) => {
   const { role } = req.query;
 
-  let artistDocs: ArtistDocument[];
+  let artistDocs: ArtistPopulatedDocument[];
 
   if (role === undefined) {
-    artistDocs = await ArtistModel.find();
+    artistDocs = await ArtistModel.find().populate<{ roles: ArtistRoleDocument[] }>('roles');
   } else {
-    artistDocs = await ArtistModel.find({ roles: { $in: role } });
+    const populatedArtistDocs = await ArtistModel.find().populate<{ roles: ArtistRoleDocument[] }>('roles');
+    artistDocs = populatedArtistDocs
+      .filter((populatedArtistDoc) => populatedArtistDoc.roles
+        .some((oneRole) => oneRole.title === role));
   }
 
   res.status(200).json({
-    artists: artistDocs.map((artistDoc) => createArtistViewModel(artistDoc)),
+    artists: artistDocs.map((artistDoc) => createArtistPopulatedViewModel(artistDoc)),
   });
 };
 
-type GetArtistRequestHandler = RequestHandler<
+export const getArtist: RequestHandler<
   { id: string },
   SingularArtistRequestHandlerResponse
->;
-
-export const getArtist: GetArtistRequestHandler = async (req, res) => {
+> = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -54,13 +55,11 @@ export const getArtist: GetArtistRequestHandler = async (req, res) => {
   }
 };
 
-type CreateArtistRequestHandler = RequestHandler<
+export const createArtist: RequestHandler<
   unknown,
   SingularArtistRequestHandlerResponse,
   Artist
->;
-
-export const createArtist: CreateArtistRequestHandler = async (req, res) => {
+> = async (req, res) => {
   const artistProps = req.body;
   try {
     const createdArtistDoc = await ArtistModel.create(artistProps);
@@ -76,13 +75,11 @@ export const createArtist: CreateArtistRequestHandler = async (req, res) => {
   }
 };
 
-type UpdateArtistRequestHandler = RequestHandler<
+export const updateArtist: RequestHandler<
   { id: string },
   SingularArtistRequestHandlerResponse,
   UpdateQuery<Artist> | undefined
->;
-
-export const updateArtist: UpdateArtistRequestHandler = async (req, res) => {
+> = async (req, res) => {
   const artistProps = req.body;
   const { id } = req.params;
 
@@ -108,12 +105,10 @@ export const updateArtist: UpdateArtistRequestHandler = async (req, res) => {
   }
 };
 
-type DeleteArtistRequestHandler = RequestHandler<
+export const deleteArtist: RequestHandler<
   { id: string },
   SingularArtistRequestHandlerResponse
->;
-
-export const deleteArtist: DeleteArtistRequestHandler = async (req, res) => {
+> = async (req, res) => {
   const { id } = req.params;
 
   try {
