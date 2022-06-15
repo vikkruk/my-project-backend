@@ -10,38 +10,29 @@ type SingularMovieRequestHandlerResponse = { movie: MovieViewModel } | ErrorResp
 
 export const getMovies: RequestHandler<
   unknown,
-  { movies: MovieViewModel[] | MoviePopulatedViewModel[] } | ErrorResponseBody,
+  { movies: MoviePopulatedViewModel[] } | ErrorResponseBody,
   unknown,
-  { genre?: string, populate?: string }
+  { genre?: string }
 > = async (req, res) => {
-  const { genre, populate } = req.query;
+  const { genre } = req.query;
 
-  let movies: MovieViewModel[] | MoviePopulatedViewModel[];
+  let movies: MoviePopulatedViewModel[];
 
   try {
-    if (genre !== undefined && populate === undefined) {
-      const movieDocs = await MovieModel.find({ genres: { $in: genre } });
-      movies = movieDocs.map(createMovieViewModel);
-    } else if (genre === undefined && populate === 'all') {
-      const movieDocs = await MovieModel.find()
-        .populate<{
-          directors: ArtistDocument[],
-          actors: ArtistDocument[],
-          genres: GenreDocument[],
-        }>({ path: 'directors actors genres', options: { _recursed: true } });
-      movies = movieDocs.map(createMoviePopulatedViewModel);
-    } else if (genre !== undefined && populate === 'all') {
-      const movieDocs = await MovieModel.find({ genres: { $in: genre } })
-        .populate<{
-          directors: ArtistDocument[],
-          actors: ArtistDocument[],
-          genres: GenreDocument[],
-        }>({ path: 'directors actors genres', options: { _recursed: true } });
+    const movieDocs = await MovieModel.find().populate<{
+      directors: ArtistDocument[],
+      actors: ArtistDocument[],
+      genres: GenreDocument[],
+    }>({ path: 'directors actors genres', options: { _recursed: true } });
+    if (genre === undefined) {
       movies = movieDocs.map(createMoviePopulatedViewModel);
     } else {
-      const movieDocs = await MovieModel.find();
-      movies = movieDocs.map(createMovieViewModel);
+      const populatedMoviesDocsByGenre = movieDocs
+        .filter((movieDoc) => movieDoc.genres
+          .some((oneGenre) => oneGenre.name === genre));
+      movies = populatedMoviesDocsByGenre.map(createMoviePopulatedViewModel);
     }
+
     res.status(200).json({
       movies,
     });

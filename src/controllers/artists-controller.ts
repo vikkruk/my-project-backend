@@ -16,11 +16,11 @@ export const getArtists: RequestHandler<
   const { role } = req.query;
 
   let artistDocs: ArtistPopulatedDocument[];
+  const populatedArtistDocs = await ArtistModel.find().populate<{ roles: ArtistRoleDocument[] }>('roles');
 
   if (role === undefined) {
-    artistDocs = await ArtistModel.find().populate<{ roles: ArtistRoleDocument[] }>('roles');
+    artistDocs = populatedArtistDocs;
   } else {
-    const populatedArtistDocs = await ArtistModel.find().populate<{ roles: ArtistRoleDocument[] }>('roles');
     artistDocs = populatedArtistDocs
       .filter((populatedArtistDoc) => populatedArtistDoc.roles
         .some((oneRole) => oneRole.title === role));
