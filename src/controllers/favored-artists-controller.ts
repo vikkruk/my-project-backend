@@ -25,10 +25,10 @@ export const getFavoredArtists: RequestHandler<
     FavoredArtistViewModel[] | FavoredArtistPopulatedViewModel[]
   } | ErrorResponseBody,
   unknown,
-  { artistRole?: string, populate?: string }
+  { artistRole?: string }
 > = async (req, res) => {
   const { authUserDoc } = req;
-  const { artistRole, populate } = req.query;
+  const { artistRole } = req.query;
   try {
     if (artistRole === undefined) throw new Error('Role is required');
 
@@ -37,27 +37,19 @@ export const getFavoredArtists: RequestHandler<
     }
     if (!isArtistType(artistRole)) throw new Error('Role is invalid');
 
-    const shouldPopulate = populate === 'artists';
     const artistCollectionName = artistCollectionByRole[artistRole];
-    if (shouldPopulate) {
-      const populatedAuthUserDoc = await authUserDoc.populate<{
-        favored: {
-          actors: FavoredArtistPopulatedDocument[],
-          directors: FavoredArtistPopulatedDocument[]
-        }
-      }>(`favored.${[artistCollectionName]}.artistId`);
 
-      res.status(200).json({
-        favoredArtists: populatedAuthUserDoc.favored[artistCollectionName]
-          .map(createFavoredArtistPopulatedViewModel),
+    const populatedAuthUserDoc = await authUserDoc.populate<{
+      favored: {
+        actors: FavoredArtistPopulatedDocument[],
+        directors: FavoredArtistPopulatedDocument[]
+      }
+    }>(`favored.${[artistCollectionName]}.artistId`);
 
-      });
-    } else {
-      res.status(200).json({
-        favoredArtists: authUserDoc.favored[artistCollectionName]
-          .map(createFavoredArtistViewModel),
-      });
-    }
+    res.status(200).json({
+      favoredArtists: populatedAuthUserDoc.favored[artistCollectionName]
+        .map(createFavoredArtistPopulatedViewModel),
+    });
   } catch (error) {
     res.status(400).json({
       error: error instanceof Error ? error.message : `Couldn't find user's favored ${artistRole}s`,

@@ -3,13 +3,13 @@ import createArtistViewModel, { ArtistViewModel } from './create-artist-view-mod
 
 export type FavoredArtistPopulatedViewModel = {
   id: string,
-  artistId: ArtistViewModel,
+  artist: ArtistViewModel,
 };
 
 const createFavoredArtistPopulatedViewModel = (favActor: FavoredArtistPopulatedDocument):
   FavoredArtistPopulatedViewModel => ({
     id: favActor._id.toString(),
-    artistId: createArtistViewModel(favActor.artistId),
+    artist: createArtistViewModel(favActor.artistId),
   });
 
 export default createFavoredArtistPopulatedViewModel;

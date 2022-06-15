@@ -24,7 +24,7 @@ export const getMovies: RequestHandler<
       actors: ArtistDocument[],
       genres: GenreDocument[],
     }>({ path: 'directors actors genres', options: { _recursed: true } });
-    if (genre === undefined) {
+    if (genre === undefined || genre === 'all') {
       movies = movieDocs.map(createMoviePopulatedViewModel);
     } else {
       const populatedMoviesDocsByGenre = movieDocs
