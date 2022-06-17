@@ -111,21 +111,22 @@ export const authenticate: RequestHandler<
   }
 };
 
-export const checkEmail: RequestHandler<
+export const checkAvailability: RequestHandler<
   unknown,
   { available: true } | ErrorResponseBody,
   unknown,
-  { email?: string }
+  { value: string, type: string }
 > = async (req, res) => {
   try {
-    const { email } = req.query;
-    if (email === undefined) {
-      throw new Error('Email is required for checking');
+    const { value, type } = req.query;
+    if (value === undefined || type === undefined) {
+      throw new Error('Value and type needed for checking');
     }
 
-    const userDoc = await UserModel.findOne({ email });
+    const userDoc = await UserModel.findOne({ [type]: value });
+
     if (userDoc !== null) {
-      throw new Error('This email is already registered');
+      throw new Error(`This ${type} is already taken`);
     }
     res.status(200).json({
       available: true,
@@ -135,6 +136,31 @@ export const checkEmail: RequestHandler<
       error: error instanceof Error
         ? error.message
         : 'Error occured while logging in',
+    });
+  }
+};
+
+export const updateUser: RequestHandler = async (req, res) => {
+  try {
+    if (req.tokenData === undefined) {
+      throw new Error('Error occured while authenticating the user');
+    }
+    const { email, token } = req.tokenData;
+
+    const userDoc = await UserModel.findOne({ email });
+    if (userDoc === null) {
+      throw new Error(`User with email ${email} was not found`);
+    }
+
+    res.status(200).json({
+      user: createUserViewModel(userDoc),
+      token,
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error instanceof Error
+        ? error.message
+        : 'Couldn\'t authenticate the user',
     });
   }
 };

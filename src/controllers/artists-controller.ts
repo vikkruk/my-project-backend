@@ -62,7 +62,9 @@ export const createArtist: RequestHandler<
 > = async (req, res) => {
   const artistProps = req.body;
   try {
-    const createdArtistDoc = await ArtistModel.create(artistProps);
+    const createdArtistDoc = await ArtistModel.create({
+      ...artistProps,
+    });
     res.status(201).json({
       artist: createArtistViewModel(createdArtistDoc),
     });
