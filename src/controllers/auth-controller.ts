@@ -46,7 +46,11 @@ export const login: RequestHandler<
   }
 };
 
-export const register: RequestHandler = async (req, res) => {
+export const register: RequestHandler<
+  unknown,
+  AuthResponseBody,
+  Partial<UserProps>
+> = async (req, res) => {
   const { email, password } = req.body;
   try {
     if (!email) throw new Error('Email is required');
@@ -61,11 +65,11 @@ export const register: RequestHandler = async (req, res) => {
     const token = jwt.sign({ email, role: createdUser.role }, config.token.secret);
 
     res.status(201).json({
-      user: createdUser,
+      user: createUserViewModel(createdUser),
       token: `Bearer ${token}`,
     });
   } catch (error) {
-    let errorMessage;
+    let errorMessage = 'Server error';
 
     if (error instanceof Error.ValidationError) {
       if (error.errors.email) {
@@ -73,12 +77,11 @@ export const register: RequestHandler = async (req, res) => {
       }
     } else if (error instanceof Error) {
       errorMessage = error.message;
-    } else {
-      errorMessage = 'Server error';
+
+      res.status(400).json({
+        error: errorMessage,
+      });
     }
-    res.status(400).json({
-      error: errorMessage,
-    });
   }
 };
 
@@ -140,21 +143,34 @@ export const checkAvailability: RequestHandler<
   }
 };
 
-export const updateUser: RequestHandler = async (req, res) => {
+export const updateUser: RequestHandler<
+  unknown,
+  AuthResponseBody,
+  Partial<UserProps>
+> = async (req, res) => {
+  const userProps: Partial<UserProps> = req.body;
   try {
     if (req.tokenData === undefined) {
       throw new Error('Error occured while authenticating the user');
     }
-    const { email, token } = req.tokenData;
+    const { email } = req.tokenData;
 
     const userDoc = await UserModel.findOne({ email });
     if (userDoc === null) {
       throw new Error(`User with email ${email} was not found`);
     }
 
+    if (userProps.email) userDoc.email = userProps.email;
+    if (userProps.nickname) userDoc.nickname = userProps.nickname;
+    if (userProps.avatar) userDoc.avatar = userProps.avatar;
+
+    await userDoc.save();
+
+    const newToken = jwt.sign({ email: userDoc.email, role: userDoc.role }, config.token.secret);
+
     res.status(200).json({
       user: createUserViewModel(userDoc),
-      token,
+      token: `Bearer ${newToken}`,
     });
   } catch (error) {
     res.status(400).json({
