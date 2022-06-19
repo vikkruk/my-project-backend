@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import {
-  createMovie, deleteMovie, getMovie, getMovies, updateMovie,
+  createMovie, deleteMovie, getMovie, getMovies, getRandomMovieImage, updateMovie,
 } from '../controllers/movies-controller';
 import { adminMiddleware, authMiddleware } from '../middlewares/auth-middlewares';
 
 const movieRouter = Router();
 
 movieRouter.get('/', getMovies);
+movieRouter.get('/get-random-image', getRandomMovieImage);
 movieRouter.get('/:id', getMovie);
 movieRouter.post('/', authMiddleware, adminMiddleware, createMovie);
 movieRouter.patch('/:id', authMiddleware, adminMiddleware, updateMovie);

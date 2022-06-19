@@ -11,6 +11,7 @@ export type Movie = {
   directors: Types.ObjectId[],
   actors: Types.ObjectId[],
   genres: Types.ObjectId[],
+  images?: string[],
 };
 
 export type MovieDocument = Document<Types.ObjectId, unknown, Movie> & Movie & {
@@ -56,6 +57,9 @@ const movieSchema = new Schema<Movie, Model<Movie>>({
       ref: 'Genre',
       required: true,
     }],
+  },
+  images: {
+    type: [String],
   },
 });
 

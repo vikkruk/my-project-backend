@@ -139,3 +139,30 @@ export const deleteMovie: RequestHandler<
     });
   }
 };
+
+export const getRandomMovieImage: RequestHandler<
+  unknown,
+  { randomImage: string } | ErrorResponseBody
+> = async (_, res) => {
+  try {
+    const movies = await MovieModel.find();
+    if (movies.length < 1) {
+      throw new Error('Couldn\'t find any movies');
+    }
+    const randomMovie = (movies[Math.floor(Math.random() * ((movies.length)))]);
+    if (!randomMovie.images) {
+      throw new Error('Add some images to movies');
+    }
+    const randomImage = randomMovie.images[0];
+
+    res.status(200).json({
+      randomImage,
+    });
+  } catch (error) {
+    res.status(404).json({
+      error: error instanceof Error
+        ? error.message
+        : 'Error occured while fetching random image from movies',
+    });
+  }
+};

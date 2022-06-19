@@ -8,6 +8,7 @@ export type MovieViewModel = {
   directors: string[],
   actors: string[],
   genres: string[],
+  images?: string[],
 };
 
 const createMovieViewModel = (movieDoc: MovieDocument): MovieViewModel => ({
@@ -18,6 +19,7 @@ const createMovieViewModel = (movieDoc: MovieDocument): MovieViewModel => ({
   directors: movieDoc.directors.map((director) => director.toString()),
   actors: movieDoc.actors.map((actor) => actor.toString()),
   genres: movieDoc.genres.map((genre) => genre.toString()),
+  images: movieDoc.images,
 });
 
 export default createMovieViewModel;

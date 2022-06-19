@@ -10,6 +10,7 @@ export type MoviePopulatedViewModel = {
   directors: ArtistViewModel[],
   actors: ArtistViewModel[],
   genres: GenreViewModel[],
+  images?: string[],
 };
 
 const createMoviePopulatedViewModel = (movieDoc:
@@ -21,6 +22,7 @@ const createMoviePopulatedViewModel = (movieDoc:
     directors: movieDoc.directors.map(createArtistViewModel),
     actors: movieDoc.actors.map(createArtistViewModel),
     genres: movieDoc.genres.map(createGenreViewModel),
+    images: movieDoc.images,
   });
 
 export default createMoviePopulatedViewModel;
