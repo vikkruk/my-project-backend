@@ -29,7 +29,7 @@ export const getArtists: RequestHandler<
   if (gender !== undefined) {
     artistDocs = artistDocs.filter((artistDoc) => artistDoc.gender === gender);
   }
-  console.log(artistDocs);
+
   res.status(200).json({
     artists: artistDocs.map((artistDoc) => createArtistPopulatedViewModel(artistDoc)),
   });
