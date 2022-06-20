@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { Types } from 'mongoose';
-import { FavoredArtist, FavoredArtistPopulatedDocument } from '../models/user-model';
+import { FavoredArtist, FavoredArtistPopulatedDocument, UserPopulatedDocument } from '../models/user-model';
 import createFavoredArtistPopulatedViewModel, { FavoredArtistPopulatedViewModel } from '../view-model-creators/create-favored-artist-populated-view-model';
 import createFavoredArtistViewModel, { FavoredArtistViewModel } from '../view-model-creators/create-favored-artist-view-model';
 
@@ -25,10 +25,10 @@ export const getFavoredArtists: RequestHandler<
     FavoredArtistViewModel[] | FavoredArtistPopulatedViewModel[]
   } | ErrorResponseBody,
   unknown,
-  { artistRole?: string }
+  { artistRole?: string, gender?: string }
 > = async (req, res) => {
   const { authUserDoc } = req;
-  const { artistRole } = req.query;
+  const { artistRole, gender } = req.query;
   try {
     if (artistRole === undefined) throw new Error('Role is required');
 
@@ -39,15 +39,24 @@ export const getFavoredArtists: RequestHandler<
 
     const artistCollectionName = artistCollectionByRole[artistRole];
 
-    const populatedAuthUserDoc = await authUserDoc.populate<{
+    const populatedAuthUserDoc: UserPopulatedDocument = await authUserDoc.populate<{
       favored: {
         actors: FavoredArtistPopulatedDocument[],
         directors: FavoredArtistPopulatedDocument[]
       }
     }>(`favored.${[artistCollectionName]}.artistId`);
 
+    let favoredArtists: FavoredArtistPopulatedDocument[];
+
+    if (gender !== undefined) {
+      favoredArtists = populatedAuthUserDoc.favored[artistCollectionName]
+        .filter((artist) => artist.artistId.gender === gender);
+    } else {
+      favoredArtists = populatedAuthUserDoc.favored[artistCollectionName];
+    }
+
     res.status(200).json({
-      favoredArtists: populatedAuthUserDoc.favored[artistCollectionName]
+      favoredArtists: favoredArtists
         .map(createFavoredArtistPopulatedViewModel),
     });
   } catch (error) {

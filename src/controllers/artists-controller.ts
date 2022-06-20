@@ -11,9 +11,9 @@ export const getArtists: RequestHandler<
   unknown,
   { artists: ArtistPopulatedViewModel[] },
   unknown,
-  { role?: 'actor' | 'director' | 'writer' }
+  { role?: 'actor' | 'director' | 'writer', gender?: string }
 > = async (req, res) => {
-  const { role } = req.query;
+  const { role, gender } = req.query;
 
   let artistDocs: ArtistPopulatedDocument[];
   const populatedArtistDocs = await ArtistModel.find().populate<{ roles: ArtistRoleDocument[] }>('roles');
@@ -26,6 +26,10 @@ export const getArtists: RequestHandler<
         .some((oneRole) => oneRole.title === role));
   }
 
+  if (gender !== undefined) {
+    artistDocs = artistDocs.filter((artistDoc) => artistDoc.gender === gender);
+  }
+  console.log(artistDocs);
   res.status(200).json({
     artists: artistDocs.map((artistDoc) => createArtistPopulatedViewModel(artistDoc)),
   });

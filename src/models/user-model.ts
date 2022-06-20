@@ -60,6 +60,13 @@ export type UserDocument = Document<Types.ObjectId, unknown, User> & User & {
   _id: Types.ObjectId;
 };
 
+export type UserPopulatedDocument = Omit<UserDocument, 'favored'> & {
+  favored: {
+    actors: FavoredArtistPopulatedDocument[],
+    directors: FavoredArtistPopulatedDocument[]
+  }
+};
+
 const userSchema = new Schema<User, Model<User>>({
   email: {
     type: String,
