@@ -31,7 +31,7 @@ export const getArtists: RequestHandler<
   }
 
   res.status(200).json({
-    artists: artistDocs.map((artistDoc) => createArtistPopulatedViewModel(artistDoc)),
+    artists: artistDocs.reverse().map((artistDoc) => createArtistPopulatedViewModel(artistDoc)),
   });
 };
 
