@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import {
-  createArtist,
-  deleteArtist,
-  getArtist,
   getArtists,
+  getArtist,
+  createArtist,
   updateArtist,
+  deleteArtist,
 } from '../controllers/artists-controller';
 import { adminMiddleware, authMiddleware } from '../middlewares/auth-middlewares';
 

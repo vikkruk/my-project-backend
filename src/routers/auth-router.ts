@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import {
+  checkAvailability,
   login,
   register,
   authenticate,
-  checkAvailability,
   updateUser,
 } from '../controllers/auth-controller';
 import { authMiddleware } from '../middlewares/auth-middlewares';

@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import {
-  addFavoredArtist,
   getFavoredArtists,
+  addFavoredArtist,
   removeFavoredArtist,
 } from '../controllers/favored-artists-controller';
-
 import { authMiddleware, userMiddleware } from '../middlewares/auth-middlewares';
 
 const favoredArtistsRouter = Router();

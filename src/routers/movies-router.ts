@@ -1,6 +1,11 @@
 import { Router } from 'express';
 import {
-  createMovie, deleteMovie, getMovie, getMovies, getRandomMovieImage, updateMovie,
+  getMovies,
+  getRandomMovieImage,
+  getMovie,
+  createMovie,
+  updateMovie,
+  deleteMovie,
 } from '../controllers/movies-controller';
 import { adminMiddleware, authMiddleware } from '../middlewares/auth-middlewares';
 

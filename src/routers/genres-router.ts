@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import {
-  createGenre,
-  deleteGenre,
-  getGenre,
   getGenres,
+  getGenre,
+  createGenre,
   updateGenre,
+  deleteGenre,
 } from '../controllers/genre-controller';
 import { adminMiddleware, authMiddleware } from '../middlewares/auth-middlewares';
 

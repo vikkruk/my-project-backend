@@ -1,10 +1,10 @@
 import { RequestHandler } from 'express';
 import { Error, UpdateQuery } from 'mongoose';
 import MovieModel, { Movie } from '../models/movie-model';
-import createMovieViewModel, { MovieViewModel } from '../view-model-creators/create-movie-view-model';
-import createMoviePopulatedViewModel, { MoviePopulatedViewModel } from '../view-model-creators/create-movie-populated-view-model';
 import { ArtistDocument } from '../models/artist-model';
 import { GenreDocument } from '../models/genre-model';
+import createMovieViewModel, { MovieViewModel } from '../view-model-creators/create-movie-view-model';
+import createMoviePopulatedViewModel, { MoviePopulatedViewModel } from '../view-model-creators/create-movie-populated-view-model';
 
 type SingularMovieRequestHandlerResponse = { movie: MovieViewModel } | ErrorResponseBody;
 
